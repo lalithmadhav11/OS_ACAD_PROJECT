@@ -15,3 +15,9 @@ pthread_mutex_t chair_mutex;
 int waiting_students=0;
 int chairs[MAX_STUDENTS];
 int next_seat=0,next_help=0;
+
+void *faculty_thread(void *arg);
+void *student_thread(void *arg);
+void simulate_work();
+void print_queue();
+void log_event(const char *role,const char *msg,int id);
