@@ -18,6 +18,17 @@ int next_seat=0,next_help=0;
 
 void *faculty_thread(void *arg);
 void *student_thread(void *arg);
-void simulate_work();
-void print_queue();
-void log_event(const char *role,const char *msg,int id);
+void  simulate_work();
+void  print_queue();
+void  log_event(const char *role,const char *msg,int id);
+
+void log_event(const char *role,const char *msg,int id){
+    time_t now=time(NULL);
+    struct tm *t=localtime(&now);
+    if(id==-1){
+        printf("[%02d:%02d:%02d] [%s] %s\n", t->tm_hour, t->tm_min, t->tm_sec, role, msg);
+    }
+    else{
+        printf("[%02d:%02d:%02d] [%s %d] %s\n", t->tm_hour, t->tm_min, t->tm_sec, role, id, msg);
+    }
+}
