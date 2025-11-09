@@ -8,7 +8,7 @@ why const ? to make sure string doesnt get modified inside the function.
 msg -> it tell ys what is being done to role ex : needs help, sits on chair.
 id -> for student its form 0 till max_st8udents-1 ; -1 means its faculty.
 
-// LOGIC EXPLANATION :
+// LOGIC :
 time_t ->a datatype for stoirng time 
        -> it will store time in seconds since Jan 1 1970
 time(NULL) -> return the current system time
@@ -18,3 +18,16 @@ struct tm *t=localtime(&now):
     -> struct tm has tm_hours,tm_min,tm_sec
     -> localtime(&now)-> now means current time it will be converted to local timezone FormData.
 
+simulate_work :
+// WHY?
+it stimualtes delay when -> student doing programming needs help
+                         -> faculty helping student
+// LOGIC :
+random becasue :
+        students won’t all ask for help at the same time, and faculty helps for random durations.
+        just like a real operating system’s scheduling. 
+
+print_queue :
+
+// WHY ?
+to display current waiting students. 

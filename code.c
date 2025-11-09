@@ -32,3 +32,22 @@ void log_event(const char *role,const char *msg,int id){
         printf("[%02d:%02d:%02d] [%s %d] %s\n", t->tm_hour, t->tm_min, t->tm_sec, role, id, msg);
     }
 }
+
+void simulate_work(){
+    int t = rand()%3 +1 ;// -> 1 to 3 seconds
+    sleep(t); 
+}
+
+void print_queue(){
+    printf(" Chairs: ");
+    if(waiting_students==0){
+        printf("[ empty ]\n");
+        return;
+    }
+    printf("[ ");
+    for(int i=0;i<waiting_students;i++){
+        int index=(next_help + i)% MAX_CHAIRS ;
+        printf("S%d ",chairs[index]);
+    }
+    printf("]\n");
+}
