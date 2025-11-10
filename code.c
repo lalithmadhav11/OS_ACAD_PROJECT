@@ -111,3 +111,29 @@ void *student_thread(void *arg){
     }
     return NULL;
 }
+
+int main(){
+    srand(time(NULL));
+
+    pthread_t faculty;
+    pthread_t students[MAX_STUDENTS];
+    int id[MAX_STUDENTS];
+
+    sem_init(&faculty_sem,0,0);
+    pthread_mutex_init(&chair_mutex,NULL);
+    for(int i=0;i<MAX_STUDENTS;i++){
+        sem_init(&student_sem[i],0,0);
+    }
+
+    pthread_create(&faculty,NULL,faculty_thread,NULL);
+    for(int i=0;i<MAX_STUDENTS;i++){
+        id[i]=i;
+        pthread_create(&students[i],NULL,student_thread,&id[i]);
+    }
+
+    pthread_join(faculty,NULL);
+    for(int i=0;i<MAX_STUDENTS;i++){
+        pthread_join(students[i],NULL);
+    }
+    return 0;
+}
