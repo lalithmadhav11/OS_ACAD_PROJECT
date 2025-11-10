@@ -30,4 +30,42 @@ random becasue :
 print_queue :
 
 // WHY ?
-to display current waiting students. 
+to display current waiting students.
+
+
+faculty_thread :
+
+// ARGS AND  DEF :
+Function returns a generic pointer, because that’s the standard type for all pthread functions.
+Threads in C must have this signature: void* function(void* arg).
+
+// LOGIC:
+
+why while(1) ?
+    Keeps the faculty continuously available — sleeping, waking, helping — until the program is terminated.
+
+sem_wait(&facuulty_sem)?
+    sem_wait(x)-> decrements semaphore x 
+    if val of facuulty_sem is 0 the thread is blocked(Sleeps).
+    if a student calls sem_post(&faculty_Sem) the thread is unblocked and continues.C
+    Implements the “sleeping faculty” logic —
+    faculty stays asleep until a student wakes them up using a semaphore signal.
+
+pthread_mutex_lock(&chair_mutex):
+// why ? 
+        to prevent race condition.
+// logic 
+    locks the chair_mtex in exclusive lock.
+    it ensures only on ethread (faculty or stu) to modify or read the shared var such as : waiting_stu,chairs[],next_help
+
+if(waiting_stu==0) // why we are checking? -> of no stu is there facylty should go to sellep
+    pthread_mutex_unlock(&chair_mutex)
+        relaeses the lock before going to sleep.C
+        // why ? -> to prevent deadlock.
+        if not there other threads like students cant access the quueue.
+
+int sid=chairs[next_help]; // select next student to help.
+next_help=(next_help+1)%MAX_CHAIRS; // moves ptr forward.
+waiting_Students--; // since faculty already helped one student we decrement count.
+
+     

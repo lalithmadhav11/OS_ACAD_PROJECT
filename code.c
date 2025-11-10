@@ -51,3 +51,34 @@ void print_queue(){
     }
     printf("]\n");
 }
+
+void *faculty_thread(void *arg){
+    while(1){
+        sem_wait(&faculty_sem);
+        pthread_mutex_lock(&chair_mutex);
+        if(waiting_students==0){
+            pthread_mutex_unlock(&chair_mutex);
+            log_event("Faculty", "No students waiting. Goes back to sleep.", -1);
+            continue;
+        }
+
+        int sid=chairs[next_help];
+        next_help=(next_help + 1)%MAX_CHAIRS;
+        waiting_students--;
+        
+        char msg[80];
+        sprintf(msg, "Starts helping Student %d. Waiting left: %d", sid, waiting_students);
+        log_event("Faculty",msg,-1);
+        print_queue();
+
+        pthread_mutex_unlock(&chair_mutex);
+
+        simulate_work();
+
+        sprintf(msg,"Finished helping Student %d",sid);
+        log_event("Faculty",msg,-1);
+
+        sem_post(&student_sem[sid]);
+    }
+    return NULL;
+}
