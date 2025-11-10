@@ -82,3 +82,32 @@ void *faculty_thread(void *arg){
     }
     return NULL;
 }
+
+void *student_thread(void *arg){
+    int id=*(int * )arg;
+    while(1){
+        simulate_work();
+        log_event("Student","Needs help.",id);
+        pthread_mutex_lock(&chair_mutex);
+        if(waiting_students<MAX_CHAIRS){
+            chairs[next_seat]=id;
+            next_seat=(next_seat+1)&MAX_CHAIRS;
+            waiting_students++;
+
+            char msg[80];
+            sprintf(msg,"Sits on chair. Waiting students : %d",waiting_students);
+            log_event("Student",msg,id);
+
+            sem_post(&faculty_sem);
+            pthread_mutex_unlock(&chair_mutex);
+
+            sem_wait(&student_sem[id]);
+            log_event("Student","Got help. Back to programming.",id);
+        }
+        else{
+            log_event("Student","NO chairs available. Goes back to programming.",id);
+            pthread_mutex_unlock(&chair_mutex);
+        }
+    }
+    return NULL;
+}
