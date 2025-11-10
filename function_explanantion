@@ -1,79 +1,133 @@
 log_event :
-// WHY ?
-this is used to trace the synchronistaion process
+        // WHY ?
+        this is used to trace the synchronistaion process
 
-// PARAMS EXPLAINIG :
-role->student or faqculty
-why const ? to make sure string doesnt get modified inside the function.
-msg -> it tell ys what is being done to role ex : needs help, sits on chair.
-id -> for student its form 0 till max_st8udents-1 ; -1 means its faculty.
+        // PARAMS EXPLAINIG :
+        role->student or faqculty
+        why const ? to make sure string doesnt get modified inside the function.
+        msg -> it tell ys what is being done to role ex : needs help, sits on chair.
+        id -> for student its form 0 till max_st8udents-1 ; -1 means its faculty.
 
-// LOGIC :
-time_t ->a datatype for stoirng time 
-       -> it will store time in seconds since Jan 1 1970
-time(NULL) -> return the current system time
+        // LOGIC :
+        time_t ->a datatype for stoirng time 
+            -> it will store time in seconds since Jan 1 1970
+        time(NULL) -> return the current system time
 
-struct tm *t=localtime(&now):
-    -> converts raw time into a human readable time 
-    -> struct tm has tm_hours,tm_min,tm_sec
-    -> localtime(&now)-> now means current time it will be converted to local timezone FormData.
+        struct tm *t=localtime(&now):
+            -> converts raw time into a human readable time 
+            -> struct tm has tm_hours,tm_min,tm_sec
+            -> localtime(&now)-> now means current time it will be converted to local timezone FormData.
 
 simulate_work :
-// WHY?
-it stimualtes delay when -> student doing programming needs help
-                         -> faculty helping student
-// LOGIC :
-random becasue :
-        students won’t all ask for help at the same time, and faculty helps for random durations.
-        just like a real operating system’s scheduling. 
+        // WHY?
+        it stimualtes delay when -> student doing programming needs help
+                                -> faculty helping student
+        // LOGIC :
+        random becasue :
+                students won’t all ask for help at the same time, and faculty helps for random durations.
+                just like a real operating system’s scheduling. 
 
-print_queue :
+        print_queue :
 
-// WHY ?
-to display current waiting students.
+        // WHY ?
+        to display current waiting students.
 
 
 faculty_thread :
 
-// ARGS AND  DEF :
-Function returns a generic pointer, because that’s the standard type for all pthread functions.
-Threads in C must have this signature: void* function(void* arg).
+        // ARGS AND  DEF :
+        Function returns a generic pointer, because that’s the standard type for all pthread functions.
+        Threads in C must have this signature: void* function(void* arg).
 
-// LOGIC:
+        // LOGIC:
 
-why while(1) ?
-    Keeps the faculty continuously available — sleeping, waking, helping — until the program is terminated.
+        why while(1) ?
+            Keeps the faculty continuously available — sleeping, waking, helping — until the program is terminated.
 
-sem_wait(&facuulty_sem)?
-    sem_wait(x)-> decrements semaphore x 
-    if val of facuulty_sem is 0 the thread is blocked(Sleeps).
-    if a student calls sem_post(&faculty_Sem) the thread is unblocked and continues.C
-    Implements the “sleeping faculty” logic —
-    faculty stays asleep until a student wakes them up using a semaphore signal.
+        sem_wait(&facuulty_sem)?
+            sem_wait(x)-> decrements semaphore x 
+            if val of facuulty_sem is 0 the thread is blocked(Sleeps).
+            if a student calls sem_post(&faculty_Sem) the thread is unblocked and continues.C
+            Implements the “sleeping faculty” logic —
+            faculty stays asleep until a student wakes them up using a semaphore signal.
 
-pthread_mutex_lock(&chair_mutex):
-// why ? 
-        to prevent race condition.
-// logic 
-    locks the chair_mtex in exclusive lock.
-    it ensures only on ethread (faculty or stu) to modify or read the shared var such as : waiting_stu,chairs[],next_help
+        pthread_mutex_lock(&chair_mutex):
+        // why ? 
+                to prevent race condition.
+        // logic 
+            locks the chair_mtex in exclusive lock.
+            it ensures only on ethread (faculty or stu) to modify or read the shared var such as : waiting_stu,chairs[],next_help
 
-if(waiting_stu==0) // why we are checking? -> of no stu is there facylty should go to sellep
-    pthread_mutex_unlock(&chair_mutex)
-        relaeses the lock before going to sleep.C
-        // why ? -> to prevent deadlock.
-        if not there other threads like students cant access the quueue.
+        if(waiting_stu==0) // why we are checking? -> of no stu is there facylty should go to sellep
+            pthread_mutex_unlock(&chair_mutex)
+                relaeses the lock before going to sleep.C
+                // why ? -> to prevent deadlock.
+                if not there other threads like students cant access the quueue.
 
-int sid=chairs[next_help]; // select next student to help.
-next_help=(next_help+1)%MAX_CHAIRS; // moves ptr forward.
-waiting_Students--; // since faculty already helped one student we decrement count.
-sprintf(msg,...)-> builds the msessage string into msg.
-pthread_mutex_unlock(&chair_mutex); // releases the lock now since the shared data (queue) is modifed.
-simulate_work() // simulates time taken to help allowing other threads to run concurrently during that time.
-sem_post(&student_sem[sid])
-    sem_post()->increments the student personal semaphore.
-    the student who was waiting on sem_Wait(&student_sem[id]) in their thread now wakes up.
-    // WHAT DOESIT DO ? -> your help is done -> go back to programming.
-    // this is thread to thread communiccation using semaphores.
-return NULL // why? required by pthread function because return type is void*    
-     
+        int sid=chairs[next_help]; // select next student to help.
+        next_help=(next_help+1)%MAX_CHAIRS; // moves ptr forward.
+        waiting_Students--; // since faculty already helped one student we decrement count.
+        sprintf(msg,...)-> builds the msessage string into msg.
+        pthread_mutex_unlock(&chair_mutex); // releases the lock now since the shared data (queue) is modifed.
+        simulate_work() // simulates time taken to help allowing other threads to run concurrently during that time.
+        sem_post(&student_sem[sid])
+            sem_post()->increments the student personal semaphore.
+            the student who was waiting on sem_Wait(&student_sem[id]) in their thread now wakes up.
+            // WHAT DOESIT DO ? -> your help is done -> go back to programming.
+            // this is thread to thread communiccation using semaphores.
+        return NULL // why? required by pthread function because return type is void*    
+            
+
+student_thread : 
+        // why int id=*(int *)arg;
+        Each student thread receives a pointer to its ID from main().
+        arg is a void * (generic pointer) passed to the thread.
+        // why while(1)?
+        Keeps the student thread running forever — continuously alternating between:Programming,Requestinghelp ,Gettinghelp, Going back to programming again
+        This represents an infinite cycle of behavior for each student.
+
+        simulate_work(); 
+            Simulates the time the student spends “programming” before needing help.Ensures not all students request help simultaneously → creates realistic, asynchronous behavior.
+            Otherwise, all threads would execute instantly and unrealistically.
+        pthread_mutex_lock(&chair_mutex);
+            Locks the mutex before checking or modifying the waiting queue.
+            //Why:
+            To prevent race conditions —
+            multiple students might try to check or update the chair count at the same time.
+            The mutex ensures that only one thread manipulates waiting_students, chairs[], or next_seat at once.
+        if (waiting_students < MAX_CHAIRS)
+            // why ?
+            Checks whether there’s an empty chair available in the hallway.
+            Implements bounded waiting — maximum of MAX_CHAIRS students can wait.
+            //Logic:
+            If yes → student will sit and wait.
+            If no → chairs full → student goes back to programming.
+        sem_post(&faculty_Sem):
+            Increments (signals) the faculty semaphore.
+            If faculty is asleep (blocked on sem_wait(&faculty_sem)), this wakes them up.
+            // why:
+            Implements student-to-faculty signaling:
+            “Faculty, I need help — please wake up!”
+            This is the key synchronization mechanism.
+        pthread_mutex_unlock(&chair_mutex) :
+            //logic:
+            Releases the lock after modifying shared variables.
+            //why?:
+            Prevents deadlock and allows other threads (students or faculty) to access the queue.
+        sem_wait(&student_sem[id]);
+            //logic:
+            The student now waits (blocks) until faculty finishes helping them.
+            //why:
+            Implements faculty-to-student signaling:
+            “Wait here until I finish helping you.”
+            Faculty will later call:
+                sem_post(&student_sem[sid]);
+                which unblocks this specific student.
+        else part :
+            // logic
+            If no chairs are available:
+            Logs that all chairs are full.
+            Unlocks the mutex.
+            Student goes back to programming (loop restarts).
+            // why:
+            Avoids blocking the system when queue is full.

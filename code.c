@@ -91,7 +91,7 @@ void *student_thread(void *arg){
         pthread_mutex_lock(&chair_mutex);
         if(waiting_students<MAX_CHAIRS){
             chairs[next_seat]=id;
-            next_seat=(next_seat+1)&MAX_CHAIRS;
+            next_seat=(next_seat+1)%MAX_CHAIRS;
             waiting_students++;
 
             char msg[80];
