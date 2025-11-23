@@ -13,7 +13,7 @@ sem_t student_sem[MAX_STUDENTS];
 pthread_mutex_t chair_mutex;
 
 int waiting_students=0;
-int chairs[MAX_STUDENTS];
+int chairs[MAX_CHAIRS];
 int next_seat=0,next_help=0;
 
 void *faculty_thread(void *arg);
