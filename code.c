@@ -4,7 +4,6 @@
 #include<semaphore.h>
 #include<unistd.h>
 #include<time.h>
-
 #define MAX_STUDENTS 5
 #define MAX_CHAIRS 3
 
@@ -15,6 +14,8 @@ pthread_mutex_t chair_mutex;
 int waiting_students=0;
 int chairs[MAX_CHAIRS];
 int next_seat=0,next_help=0;
+ int stop = 0;
+
 
 void *faculty_thread(void *arg);
 void *student_thread(void *arg);
@@ -53,7 +54,7 @@ void print_queue(){
 }
 
 void *faculty_thread(void *arg){
-    while(1){
+    while(!stop){
         sem_wait(&faculty_sem);
         pthread_mutex_lock(&chair_mutex);
         if(waiting_students==0){
@@ -85,7 +86,7 @@ void *faculty_thread(void *arg){
 
 void *student_thread(void *arg){
     int id=*(int * )arg;
-    while(1){
+    while(!stop){
         simulate_work();
         log_event("Student","Needs help.",id);
         pthread_mutex_lock(&chair_mutex);
@@ -131,9 +132,21 @@ int main(){
         pthread_create(&students[i],NULL,student_thread,&id[i]);
     }
 
-    pthread_join(faculty,NULL);
-    for(int i=0;i<MAX_STUDENTS;i++){
-        pthread_join(students[i],NULL);
+    sleep(15);
+    stop = 1;   // Signal all threads to stop
+
+    // Wake any blocked threads so they can exit
+    sem_post(&faculty_sem);
+    for(int i = 0; i < MAX_STUDENTS; i++)
+        sem_post(&student_sem[i]);
+
+    // Join threads (clean shutdown)
+    pthread_join(faculty, NULL);
+    for(int i = 0; i < MAX_STUDENTS; i++) {
+        pthread_join(students[i], NULL);
     }
+
+    printf("\nSimulation finished cleanly.\n");
+
     return 0;
 }
